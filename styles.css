@@ -178,6 +178,7 @@ body {
 
 .current-word.sentence-display {
     white-space: pre-wrap;
+    line-height: 1.18;
 }
 
 .next-word {
@@ -185,6 +186,24 @@ body {
     color: var(--secondary-text);
     opacity: 0.7;
     white-space: pre-wrap;
+}
+
+.words-context.sentence-context,
+.next-word.sentence-context {
+    opacity: 0.22;
+}
+
+.words-context.sentence-context {
+    font-size: 0.95rem;
+    max-width: 72%;
+}
+
+.previous-context.sentence-context {
+    top: 14%;
+}
+
+.next-context.sentence-context {
+    bottom: 14%;
 }
 
 .controls-hint {

@@ -109,10 +109,14 @@ function startReading() {
 function updateReadingDisplay() {
     const current = state.words[state.currentIndex];
     const next = state.words[state.currentIndex + 1];
+    const isSentenceMode = state.mode === 'sentence';
 
     // Current word
     currentWordEl.textContent = current;
-    currentWordEl.classList.toggle('sentence-display', state.mode === 'sentence');
+    currentWordEl.classList.toggle('sentence-display', isSentenceMode);
+    previousContextEl.classList.toggle('sentence-context', isSentenceMode);
+    nextContextEl.classList.toggle('sentence-context', isSentenceMode);
+    nextWordEl.classList.toggle('sentence-context', isSentenceMode);
 
     // Next word
     nextWordEl.textContent = next ? `→ ${next}` : '';
@@ -120,18 +124,18 @@ function updateReadingDisplay() {
     // Previous context
     const prevStart = Math.max(0, state.currentIndex - state.wordsAround);
     const prevWords = state.words.slice(prevStart, state.currentIndex);
-    previousContextEl.textContent = prevWords.join(' ');
+    previousContextEl.textContent = prevWords.join(isSentenceMode ? '\n' : ' ');
 
     // Next context
     const nextStart = state.currentIndex + 2;
     const nextEnd = Math.min(state.words.length, nextStart + state.wordsAround - 1);
     const nextWords = state.words.slice(nextStart, nextEnd);
-    nextContextEl.textContent = nextWords.join(' ');
+    nextContextEl.textContent = nextWords.join(isSentenceMode ? '\n' : ' ');
 
     // Update font size
     fitCurrentText();
-    nextWordEl.style.fontSize = state.mode === 'sentence'
-        ? `${Math.max(16, Math.min(window.innerWidth * 0.025, 28))}px`
+    nextWordEl.style.fontSize = isSentenceMode
+        ? `${Math.max(14, Math.min(window.innerWidth * 0.02, 22))}px`
         : `${state.fontSize * 2}px`;
 }
 
@@ -141,9 +145,9 @@ function fitCurrentText() {
     }
 
     const maxWidth = window.innerWidth * 0.88;
-    const maxHeight = window.innerHeight * (state.mode === 'sentence' ? 0.42 : 0.28);
+    const maxHeight = window.innerHeight * (state.mode === 'sentence' ? 0.56 : 0.28);
     const baseSize = state.mode === 'sentence'
-        ? Math.min(window.innerWidth * 0.14, window.innerHeight * 0.26, 180)
+        ? Math.min(window.innerWidth * 0.18, window.innerHeight * 0.34, 240)
         : state.fontSize * 4;
     const minSize = state.mode === 'sentence' ? 18 : 24;
     let size = baseSize;
@@ -186,13 +190,19 @@ function handleReadingKeydown(e) {
 
 function tokenizeScript(script, mode) {
     if (mode === 'sentence') {
-        return script
+        const normalizedScript = script
             .replace(/\r\n/g, '\n')
-            .replace(/\r/g, '\n')
-            .split(/\n+/)
-            .flatMap(line => line.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [])
-            .map(sentence => sentence.trim())
+            .replace(/\r/g, '\n');
+        const lines = normalizedScript
+            .split('\n')
+            .map(line => line.trim())
             .filter(Boolean);
+
+        if (lines.length > 1) {
+            return lines;
+        }
+
+        return normalizedScript.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(sentence => sentence.trim()) || [];
     }
 
     return script.match(/[\p{L}\p{N}’'“”]+|[^\s\p{L}\p{N}’'“”]/gu) || [];

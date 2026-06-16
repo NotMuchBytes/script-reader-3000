@@ -78,9 +78,10 @@ function startReading() {
         return;
     }
 
-    // Parse script into words
+    // Parse script into words and punctuation tokens
     state.script = script;
-    state.words = script.split(/\s+/).filter(word => word.length > 0);
+    const tokens = script.match(/[\p{L}\p{N}’'“”]+|[^\s\p{L}\p{N}’'“”]/gu);
+    state.words = tokens || [];
     state.currentIndex = 0;
 
     if (state.words.length === 0) {

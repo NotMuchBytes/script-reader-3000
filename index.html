@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Reader 3000</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Core Screen -->
+    <div id="coreScreen" class="screen active">
+        <div class="core-container">
+            <h1 class="title">SCRIPT READER 3000</h1>
+            
+            <textarea id="scriptInput" 
+                      class="script-input" 
+                      placeholder="Paste your script here..."></textarea>
+            
+            <div class="core-controls">
+                <button id="startBtn" class="btn-primary">Start</button>
+                <button id="settingsBtn" class="btn-secondary">Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reading Mode Screen -->
+    <div id="readingScreen" class="screen">
+        <div class="reading-container">
+            <!-- Previous words (faded) -->
+            <div class="words-context previous-context" id="previousContext"></div>
+            
+            <!-- Current and next words (highlighted) -->
+            <div class="current-section">
+                <div class="current-word" id="currentWord"></div>
+                <div class="next-word" id="nextWord"></div>
+            </div>
+            
+            <!-- Next words (faded) -->
+            <div class="words-context next-context" id="nextContext"></div>
+            
+            <!-- Controls hint -->
+            <div class="controls-hint">
+                <span>SPACE: next | BACKSPACE: prev | R: restart | ESC: exit</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settingsScreen" class="screen">
+        <div class="settings-container">
+            <h2>Settings</h2>
+            
+            <div class="settings-group">
+                <label>Font Size</label>
+                <div class="slider-container">
+                    <input type="range" id="fontSizeSlider" min="16" max="32" value="20" class="slider">
+                    <span id="fontSizeValue">20</span>px
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label>Theme</label>
+                <div class="theme-buttons">
+                    <button id="darkModeBtn" class="theme-btn active">Dark</button>
+                    <button id="lightModeBtn" class="theme-btn">Light</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label>Words Around Current</label>
+                <div class="words-buttons">
+                    <button class="words-btn" data-words="3">3</button>
+                    <button class="words-btn active" data-words="5">5</button>
+                    <button class="words-btn" data-words="10">10</button>
+                </div>
+            </div>
+
+            <button id="backBtn" class="btn-primary">Back</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

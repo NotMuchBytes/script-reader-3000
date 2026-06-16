@@ -6,6 +6,7 @@ const state = {
     wordsAround: 5,
     fontSize: 20,
     darkMode: true,
+    mode: 'word',
 };
 
 // DOM Elements
@@ -24,6 +25,8 @@ const fontSizeSlider = document.getElementById('fontSizeSlider');
 const fontSizeValue = document.getElementById('fontSizeValue');
 const darkModeBtn = document.getElementById('darkModeBtn');
 const lightModeBtn = document.getElementById('lightModeBtn');
+const wordModeBtn = document.getElementById('wordModeBtn');
+const sentenceModeBtn = document.getElementById('sentenceModeBtn');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -52,6 +55,9 @@ function setupEventListeners() {
 
     darkModeBtn.addEventListener('click', () => setTheme(true));
     lightModeBtn.addEventListener('click', () => setTheme(false));
+    wordModeBtn.addEventListener('click', () => setMode('word'));
+    sentenceModeBtn.addEventListener('click', () => setMode('sentence'));
+    setMode(state.mode, false);
 
     // Words around buttons
     document.querySelectorAll('.words-btn').forEach(btn => {
@@ -78,10 +84,8 @@ function startReading() {
         return;
     }
 
-    // Parse script into words and punctuation tokens
     state.script = script;
-    const tokens = script.match(/[\p{L}\p{N}’'“”]+|[^\s\p{L}\p{N}’'“”]/gu);
-    state.words = tokens || [];
+    state.words = tokenizeScript(script, state.mode);
     state.currentIndex = 0;
 
     if (state.words.length === 0) {
@@ -140,6 +144,15 @@ function handleReadingKeydown(e) {
                 break;
         }
     }
+}
+
+function tokenizeScript(script, mode) {
+    if (mode === 'sentence') {
+        const sentences = script.match(/[^.!?\n]+[.!?]?(?:\s+|$)/g);
+        return sentences ? sentences.map(s => s.trim()) : [];
+    }
+
+    return script.match(/[\p{L}\p{N}’'“”]+|[^\s\p{L}\p{N}’'“”]/gu) || [];
 }
 
 function nextWord() {
@@ -203,11 +216,28 @@ function setTheme(isDark) {
     saveSettings();
 }
 
+function setMode(mode, updateSettings = true) {
+    state.mode = mode;
+
+    if (mode === 'word') {
+        wordModeBtn.classList.add('active');
+        sentenceModeBtn.classList.remove('active');
+    } else {
+        sentenceModeBtn.classList.add('active');
+        wordModeBtn.classList.remove('active');
+    }
+
+    if (updateSettings) {
+        saveSettings();
+    }
+}
+
 function saveSettings() {
     localStorage.setItem('settings', JSON.stringify({
         fontSize: state.fontSize,
         darkMode: state.darkMode,
         wordsAround: state.wordsAround,
+        mode: state.mode,
     }));
 }
 
@@ -218,7 +248,7 @@ function loadSettings() {
         state.fontSize = settings.fontSize || 20;
         state.darkMode = settings.darkMode !== false;
         state.wordsAround = settings.wordsAround || 5;
-
+        state.mode = settings.mode || 'word';
         // Apply settings
         fontSizeSlider.value = state.fontSize;
         fontSizeValue.textContent = state.fontSize;

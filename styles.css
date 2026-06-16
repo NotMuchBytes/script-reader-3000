@@ -251,12 +251,12 @@ body {
     text-align: right;
 }
 
-.theme-buttons, .words-buttons {
+.theme-buttons, .words-buttons, .mode-buttons {
     display: flex;
     gap: 0.8rem;
 }
 
-.theme-btn, .words-btn {
+.theme-btn, .words-btn, .mode-btn {
     flex: 1;
     padding: 0.6rem;
     border: 2px solid var(--secondary-text);

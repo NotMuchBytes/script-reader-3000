@@ -21,6 +21,7 @@ const currentWordEl = document.getElementById('currentWord');
 const nextWordEl = document.getElementById('nextWord');
 const previousContextEl = document.getElementById('previousContext');
 const nextContextEl = document.getElementById('nextContext');
+const fontSizeGroup = document.getElementById('fontSizeGroup');
 const fontSizeSlider = document.getElementById('fontSizeSlider');
 const fontSizeValue = document.getElementById('fontSizeValue');
 const darkModeBtn = document.getElementById('darkModeBtn');
@@ -42,13 +43,21 @@ function setupEventListeners() {
 
     // Reading mode
     document.addEventListener('keydown', handleReadingKeydown);
+    window.addEventListener('resize', () => {
+        if (readingScreen.classList.contains('active')) {
+            fitCurrentText();
+        }
+    });
 
     // Settings
     backBtn.addEventListener('click', backToCoreScreen);
     fontSizeSlider.addEventListener('input', (e) => {
+        if (state.mode === 'sentence') {
+            return;
+        }
+
         state.fontSize = parseInt(e.target.value);
         fontSizeValue.textContent = state.fontSize;
-        currentWordEl.style.fontSize = (state.fontSize * 4) + 'px';
         updateReadingDisplay();
         saveSettings();
     });
@@ -103,6 +112,7 @@ function updateReadingDisplay() {
 
     // Current word
     currentWordEl.textContent = current;
+    currentWordEl.classList.toggle('sentence-display', state.mode === 'sentence');
 
     // Next word
     nextWordEl.textContent = next ? `→ ${next}` : '';
@@ -119,8 +129,36 @@ function updateReadingDisplay() {
     nextContextEl.textContent = nextWords.join(' ');
 
     // Update font size
-    currentWordEl.style.fontSize = (state.fontSize * 4) + 'px';
-    nextWordEl.style.fontSize = (state.fontSize * 2) + 'px';
+    fitCurrentText();
+    nextWordEl.style.fontSize = state.mode === 'sentence'
+        ? `${Math.max(16, Math.min(window.innerWidth * 0.025, 28))}px`
+        : `${state.fontSize * 2}px`;
+}
+
+function fitCurrentText() {
+    if (!currentWordEl.textContent) {
+        return;
+    }
+
+    const maxWidth = window.innerWidth * 0.88;
+    const maxHeight = window.innerHeight * (state.mode === 'sentence' ? 0.42 : 0.28);
+    const baseSize = state.mode === 'sentence'
+        ? Math.min(window.innerWidth * 0.14, window.innerHeight * 0.26, 180)
+        : state.fontSize * 4;
+    const minSize = state.mode === 'sentence' ? 18 : 24;
+    let size = baseSize;
+
+    currentWordEl.style.maxWidth = `${maxWidth}px`;
+    currentWordEl.style.maxHeight = `${maxHeight}px`;
+    currentWordEl.style.fontSize = `${size}px`;
+
+    while (
+        size > minSize &&
+        (currentWordEl.scrollWidth > maxWidth || currentWordEl.scrollHeight > maxHeight)
+    ) {
+        size -= 2;
+        currentWordEl.style.fontSize = `${size}px`;
+    }
 }
 
 function handleReadingKeydown(e) {
@@ -227,9 +265,17 @@ function setMode(mode, updateSettings = true) {
         wordModeBtn.classList.remove('active');
     }
 
+    updateFontSizeControl();
+
     if (updateSettings) {
         saveSettings();
     }
+}
+
+function updateFontSizeControl() {
+    const isSentenceMode = state.mode === 'sentence';
+    fontSizeSlider.disabled = isSentenceMode;
+    fontSizeGroup.classList.toggle('disabled', isSentenceMode);
 }
 
 function saveSettings() {

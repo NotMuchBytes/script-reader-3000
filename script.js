@@ -186,8 +186,13 @@ function handleReadingKeydown(e) {
 
 function tokenizeScript(script, mode) {
     if (mode === 'sentence') {
-        const sentences = script.match(/[^.!?\n]+[.!?]?(?:\s+|$)/g);
-        return sentences ? sentences.map(s => s.trim()) : [];
+        return script
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .split(/\n+/)
+            .flatMap(line => line.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [])
+            .map(sentence => sentence.trim())
+            .filter(Boolean);
     }
 
     return script.match(/[\p{L}\p{N}’'“”]+|[^\s\p{L}\p{N}’'“”]/gu) || [];
